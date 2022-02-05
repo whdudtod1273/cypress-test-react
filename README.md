@@ -1,46 +1,124 @@
-# Getting Started with Create React App
+- [인프런 cyress](https://www.inflearn.com/course/%EC%8B%B8%EC%9D%B4%ED%94%84%EB%A0%88%EC%8A%A4-%ED%85%8C%EC%8A%A4%ED%8A%B8)강의 예제를 react에서 테스트 해봤습니다.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## **Install and configure**
 
-## Available Scripts
+```bash
+yarn add cypress --dev
+```
 
-In the project directory, you can run:
+### tsconfig.json
 
-### `yarn start`
+- tsconfig.json “compilerOptions”에 “types”:[”cypress”] 추가
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```tsx
+{
+...
+	"compilerOptions": {
+		...
+		+ "types": ["cypress"]
+		...
+	}
+...
+}
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### cypress.json
 
-### `yarn test`
+- baseUrl은 cypress가 테스트할 처음 방문하는 url입니다. 해당 속성을 사용해도 각 테스트 파일마다 `cy.visit('')` 는 작성해줘야 합니다.
+- [cypress.json option](https://docs.cypress.io/guides/references/configuration#Global)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```tsx
+{
+	"baseUrl":"http://localhost:3000"
+}
+```
 
-### `yarn build`
+## Example
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- describe : 어떤 테스트 코드인지 하나로 묶어 주는 코드
+- beforeEach : 하나의 테스트 파일이 실행되기전에 항상 실행되는 함수
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```tsx
+describe("couter test", () => {
+  beforeEach(() => {
+    // cypress.json에서 baseUrl을 http://localhost:3000로 가도록
+    // 지정해줬기 때문에 cy.visit("")만 입력해주면 된다.
+    cy.visit("");
+  });
+});
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 증가 버튼 테스트
 
-### `yarn eject`
+- 기존 count 값을 preValue에 저장시켜 놓습니다.
+- increase 버튼을 클릭한 후 count값과 preValue값을 비교해서
+  count값이 잘 증가했는지 비교합니다.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```tsx
+it("+ 버튼을 클릭 시 count가 1증가한다.", () => {
+  cy.get("[data-cy=count]")
+    .invoke("text")
+    .then((value) => {
+      const preValue = Number(value);
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+      cy.get("[data-cy=increase]").click();
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+      cy.get("[data-cy=count]")
+        .invoke("text")
+        .should("eq", String(preValue + 1));
+    });
+});
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### 감소 버튼 테스트
 
-## Learn More
+- 증가 버튼을 클릭해서 count를 1로 만들어 줍니다.
+- 기존 count 값을 preValue에 저장시켜 놓습니다.
+- decrease 버튼을 클릭한 후 count값과 preValue값을 비교해서
+  count값이 잘 감소했는지 비교합니다.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```tsx
+it("- 버튼을 클릭 시 count가 1감소한다.", () => {
+  cy.get("[data-cy=increase]").click();
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  cy.get("[data-cy=count]")
+    .invoke("text")
+    .then((value) => {
+      const preValue = Number(value);
+
+      cy.get("[data-cy=decrease]").click();
+
+      cy.get("[data-cy=count]")
+        .invoke("text")
+        .should("eq", String(preValue - 1));
+    });
+});
+```
+
+### 감소 버튼 조건 추가
+
+- count가 0일때 0보다 작아지지 않는지 테스트합니다.
+
+```tsx
+it("count가 0보다 작아질 경우 더이상 감소하지 못하게 막는다.", () => {
+  cy.get("[data-cy=decrease]").click();
+  cy.get("[data-cy=count]").invoke("text").should("eq", "0");
+});
+```
+
+### 리셋 버튼 테스트
+
+- 증가 버튼을 클릭해서 count를 1로 만들어 줍니다.
+- 리셋 버튼을 클릭한 뒤 count값이 0으로 초기화가 되는지 확인합니다.
+
+```tsx
+it("reset 버튼을 클릭 시 counter가 0으로 초기화된다.", () => {
+  cy.get("[data-cy=increase]").click();
+  cy.get("[data-cy=reset]").click();
+  cy.get("[data-cy=count]").invoke("text").should("eq", "0");
+});
+```
+
+### Select Elements
+
+[모범사례](https://docs.cypress.io/guides/references/best-practices#Selecting-Elements)
