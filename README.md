@@ -1,4 +1,5 @@
-- [인프런 cyress](https://www.inflearn.com/course/%EC%8B%B8%EC%9D%B4%ED%94%84%EB%A0%88%EC%8A%A4-%ED%85%8C%EC%8A%A4%ED%8A%B8)강의 예제를 react에서 테스트 해봤습니다.
+- [인프런 cyress](https://www.inflearn.com/course/%EC%8B%B8%EC%9D%B4%ED%94%84%EB%A0%88%EC%8A%A4-%ED%85%8C%EC%8A%A4%ED%8A%B8)강의 예제를  
+  react,typescript환경에서 테스트 해봤습니다.
 
 ## **Install and configure**
 
